@@ -1,0 +1,173 @@
+{% extends 'admin/Base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    /* Global Styles for Rule Cards */
+    .rule-node-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 1.5rem;
+        backdrop-filter: blur(15px);
+        transition: 0.3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .rule-node-card:hover {
+        border-color: var(--primary-glow);
+        transform: translateY(-5px);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+    .rule-details-box {
+        background: rgba(255, 255, 255, 0.02);
+        border-left: 2px solid var(--primary-glow);
+        padding: 1rem;
+        border-radius: 0 12px 12px 0;
+        margin: 1rem 0;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        flex-grow: 1;
+    }
+    .modify-drawer {
+        display: none;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--border-color);
+        animation: fadeIn 0.4s;
+    }
+    .tech-label-mini {
+        font-family: var(--font-logo);
+        font-size: 0.6rem;
+        color: var(--primary-glow);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 5px;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+
+<div class="container-fluid animate__animated animate__fadeIn py-4">
+    <div class="row mb-5 align-items-center">
+        <div class="col">
+            <h2 style="font-family: var(--font-logo);"><i class="fa-solid fa-scale-balanced me-3"></i>OPERATIONAL <span style="color: var(--primary-glow);">RULES.</span></h2>
+            <p class="text-secondary small mb-0">System-wide administrative guidelines and compliance protocols.</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-glow" id="deployRuleBtn" onclick="toggleAddRulePanel()">
+                <i class="fa-solid fa-plus-circle me-2"></i>INITIALIZE RULE
+            </button>
+        </div>
+    </div>
+
+    <div id="addRulePanel" style="display: none; background: rgba(0, 229, 255, 0.03); border: 1px solid var(--border-color); border-radius: 28px; padding: 2.5rem; margin-bottom: 3.5rem; backdrop-filter: blur(25px); position: relative; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.4);">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);"></div>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col">
+                <h4 style="font-family: var(--font-logo); color: var(--primary-glow); margin: 0; letter-spacing: 2px;">PROTOCOL_DEPLOYMENT.</h4>
+                <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 5px;">Injecting new regulatory constraints into the system core registry.</p>
+            </div>
+            <div class="col-auto">
+                <button type="button" onclick="toggleAddRulePanel()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-family: var(--font-logo); font-size: 0.65rem; border-radius: 8px; padding: 5px 12px; cursor: pointer; transition: 0.3s;">[ ABORT_SESSION ]</button>
+            </div>
+        </div>
+
+        <form action="/myapp/admin_add_rules_post/" method="POST">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <label style="font-family: var(--font-logo); font-size: 0.65rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">IDENTIFIER_HEADING</label>
+                    <input type="text" name="rules" placeholder="e.g. DATA_ENCRYPTION_PROTOCOL" required
+                           style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 12px; color: #fff; padding: 12px 15px; width: 100%; outline: none;">
+
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                        <small style="color: #64748b; font-family: var(--font-logo); font-size: 0.6rem; display: block; margin-bottom: 5px;">SYSTEM_ADVISORY:</small>
+                        <p style="color: #94a3b8; font-size: 0.7rem; margin: 0; line-height: 1.4;">Ensure all rules are defined with technical clarity for neural processing compliance.</p>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <label style="font-family: var(--font-logo); font-size: 0.65rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">OPERATIONAL_DESCRIPTION</label>
+                    <textarea name="det" rows="5" placeholder="Define the logical constraints and requirements..." required
+                              style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 12px; color: #fff; padding: 15px; width: 100%; outline: none; resize: none;"></textarea>
+
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" style="background: var(--primary-glow); color: #000; font-family: var(--font-logo); font-size: 0.8rem; font-weight: 700; border: none; border-radius: 10px; padding: 12px 35px; box-shadow: 0 0 15px var(--primary-glow); cursor: pointer; transition: 0.3s;">
+                            INITIALIZE PROTOCOL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for i in data %}
+        <div class="col-xl-4 col-md-6 animate__animated animate__fadeInUp">
+            <div class="rule-node-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div style="color: var(--primary-glow); font-size: 1.5rem;"><i class="fa-solid fa-scroll"></i></div>
+                    <span class="badge border border-info text-info font-monospace" style="font-size: 0.6rem;">ID: #RULE-{{ i.id }}</span>
+                </div>
+
+                <h5 class="fw-bold text-white mb-2" id="display-title-{{ i.id }}">{{ i.rules|upper }}</h5>
+
+                <div class="rule-details-box">
+                    <span class="tech-label-mini">Protocol_Details:</span>
+                    {{ i.details }}
+                </div>
+
+                <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center" id="btn-container-{{ i.id }}">
+                    <button class="btn btn-sm btn-outline-info rounded-pill px-4" onclick="showModifyDrawer('{{ i.id }}')">MODIFY</button>
+                    <a href="/myapp/admin_delete_rules/{{ i.id }}" class="text-danger small text-decoration-none" onclick="return confirm('Purge rule?')">PURGE</a>
+                </div>
+
+                <div class="modify-drawer" id="drawer-{{ i.id }}">
+                    <form method="post" action="/myapp/admin_edit_rules_post/">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ i.id }}">
+                        <label class="tech-label-mini">Heading</label>
+                        <input type="text" name="rules" value="{{ i.rules }}" class="form-control form-control-sm mb-2" onkeyup="document.getElementById('display-title-{{ i.id }}').innerText = this.value.toUpperCase()">
+                        <label class="tech-label-mini">Details</label>
+                        <textarea name="details" class="form-control form-control-sm mb-3" rows="3">{{ i.details }}</textarea>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="javascript:void(0)" class="btn btn-sm text-secondary" onclick="hideModifyDrawer('{{ i.id }}')">Cancel</a>
+                            <button type="submit" class="btn btn-glow btn-sm">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Logic for Slide-Down Add Panel
+    function toggleAddRulePanel() {
+        const panel = document.getElementById('addRulePanel');
+        const btn = document.getElementById('deployRuleBtn');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+            panel.classList.add('animate__animated', 'animate__slideInDown');
+            btn.innerHTML = '<i class="fa-solid fa-xmark me-2"></i>CLOSE_TERMINAL';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            panel.style.display = 'none';
+            btn.innerHTML = '<i class="fa-solid fa-plus-circle me-2"></i>INITIALIZE RULE';
+        }
+    }
+
+    // Existing Modify Logic
+    function showModifyDrawer(id) {
+        document.getElementById('drawer-' + id).style.display = 'block';
+        document.getElementById('btn-container-' + id).style.display = 'none';
+    }
+    function hideModifyDrawer(id) {
+        document.getElementById('drawer-' + id).style.display = 'none';
+        document.getElementById('btn-container-' + id).style.display = 'flex';
+    }
+</script>
+{% endblock %}

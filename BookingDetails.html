@@ -1,0 +1,455 @@
+
+{% extends 'staff/staffhome.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .service-grid-container { margin-top: 2rem; }
+
+    .service-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        color: #f1f5f9;
+    }
+
+    .service-table thead th {
+        font-family: var(--font-logo);
+        color: var(--primary-glow);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        padding: 10px 25px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .service-row {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .service-row:hover {
+        background: rgba(0, 229, 255, 0.04);
+        border-color: var(--primary-glow);
+        transform: translateX(5px);
+    }
+
+    .service-row td {
+        padding: 20px 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .service-row td:first-child {
+        border-left: 2px solid var(--border-color);
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+    }
+
+    .service-row td:last-child {
+        border-top-right-radius: 15px;
+        border-bottom-right-radius: 15px;
+    }
+
+    /* Status Pills */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-family: var(--font-logo);
+        font-weight: bold;
+    }
+
+    .status-pending   { background: rgba(255,193,7,0.1);   color: #ffc107;           border: 1px solid #ffc107; }
+    .status-active    { background: rgba(0,229,255,0.1);   color: var(--primary-glow); border: 1px solid var(--primary-glow); }
+    .status-done,
+    .status-completed { background: rgba(40,167,69,0.1);   color: #28a745;           border: 1px solid #28a745; }
+    .status-rejected  { background: rgba(220,53,69,0.1);   color: #dc3545;           border: 1px solid #dc3545; }
+
+    .update-link {
+        color: var(--primary-glow);
+        text-decoration: none;
+        font-family: var(--font-logo);
+        font-size: 0.75rem;
+        transition: 0.3s;
+        border: 1px solid var(--primary-glow);
+        padding: 6px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        background: transparent;
+    }
+
+    .update-link:hover {
+        background: var(--primary-glow);
+        color: #000;
+        box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    /* ── Modal Backdrop ───────────────────────────────── */
+    .modal-backdrop-custom {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-backdrop-custom.show {
+        display: flex;
+        animation: fadeInBackdrop 0.2s ease;
+    }
+
+    @keyframes fadeInBackdrop {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* ── Modal Box ────────────────────────────────────── */
+    .status-modal {
+        background: #0d1117;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 32px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 0 60px rgba(0, 229, 255, 0.1);
+        animation: slideUp 0.25s ease;
+        position: relative;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        background: transparent;
+        border: none;
+        color: rgba(255,255,255,0.3);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.2s;
+        line-height: 1;
+    }
+
+    .modal-close-btn:hover { color: var(--primary-glow); }
+
+    .modal-title {
+        font-family: var(--font-logo);
+        color: #fff;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+        border-left: 3px solid var(--primary-glow);
+        padding-left: 12px;
+    }
+
+    .modal-subtitle {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.35);
+        margin-bottom: 24px;
+        padding-left: 15px;
+    }
+
+    /* Service info inside modal */
+    .modal-service-info {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+    }
+
+    .modal-service-info .s-name {
+        font-family: var(--font-logo);
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .modal-service-info .s-id {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.3);
+        margin-top: 2px;
+    }
+
+    /* Status option buttons */
+    .status-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+
+    .status-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .status-option:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+
+    .status-option input[type="radio"] { display: none; }
+
+    .status-option.selected-completed {
+        border-color: #28a745;
+        background: rgba(40,167,69,0.08);
+    }
+
+    .status-option.selected-rejected {
+        border-color: #dc3545;
+        background: rgba(220,53,69,0.08);
+    }
+
+    .status-option-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.2);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+    .status-option.selected-completed .status-option-dot {
+        border-color: #28a745;
+        background: #28a745;
+    }
+
+    .status-option.selected-rejected .status-option-dot {
+        border-color: #dc3545;
+        background: #dc3545;
+    }
+
+    .status-option-dot::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #000;
+        display: none;
+    }
+
+    .status-option.selected-completed .status-option-dot::after,
+    .status-option.selected-rejected .status-option-dot::after {
+        display: block;
+    }
+
+    .status-option-label { font-family: var(--font-logo); font-size: 0.85rem; }
+    .status-option-desc  { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+    /* Confirm button */
+    .btn-confirm-status {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: none;
+        font-family: var(--font-logo);
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: 0.3s;
+        background: var(--primary-glow);
+        color: #000;
+        font-weight: 700;
+    }
+
+    .btn-confirm-status:hover {
+        box-shadow: 0 0 20px rgba(0,229,255,0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-confirm-status:disabled {
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.3);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+</style>
+
+<div class="container py-5 animate__animated animate__fadeIn">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h2 style="font-family: var(--font-logo);">
+                <i class="fa-solid fa-gears me-3"></i>CORE <span style="color: var(--primary-glow);">SERVICES.</span>
+            </h2>
+            <p class="text-secondary small">Operational Task Management and System Services</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="glass-card d-inline-block py-2 px-4">
+                <span class="text-secondary x-small">TOTAL ACTIVE:</span>
+                <span class="text-info fw-bold ms-2">{{ data|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="service-grid-container">
+        <div class="table-responsive">
+            <table class="service-table">
+                <thead>
+                    <tr>
+                        <th>Service Type</th>
+                        <th>Function Details</th>
+                        <th>Network Status</th>
+                        <th class="text-center">Documents</th>
+                        <th class="text-center">Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in data %}
+                    <tr class="service-row">
+                        <td>
+                            <div class="fw-bold" style="letter-spacing:0.5px;">{{ i.SERVICE.service }}</div>
+                            <div class="text-muted x-small">ID: #00{{ i.id }}</div>
+                        </td>
+                        <td>
+                            <div class="text-secondary small" style="max-width:400px;">
+                                {{ i.SERVICE.details|truncatechars:80 }}
+                            </div>
+                        </td>
+                        <td>
+                            {% with i.status|default:"ACTIVE"|lower as st %}
+                            <span class="status-pill status-{{ st }}">
+                                <i class="fa-solid fa-circle-dot fa-fade me-2" style="font-size:0.5rem;"></i>
+                                {{ i.status|default:"ACTIVE" }}
+                            </span>
+                            {% endwith %}
+                        </td>
+                        <td class="text-center">
+                            <a href="/myapp/que_process_table/{{ i.id }}" class="update-link">
+                                <i class="fa-solid fa-folder-open me-2"></i>DOCUMENTS
+                            </a>
+                        </td>
+                        <td class="text-center">
+                            <!-- Trigger modal -->
+                            <button class="update-link"
+                                    onclick="openStatusModal('{{ i.id }}', '{{ i.SERVICE.service }}')">
+                                <i class="fa-solid fa-pen-to-square me-2"></i>UPDATE
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-secondary">
+                            <i class="fa-solid fa-database mb-3 d-block" style="font-size:2rem;opacity:0.2;"></i>
+                            No active services found in registry.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Status Update Modal ─────────────────────────────────── -->
+<div class="modal-backdrop-custom" id="statusModal">
+    <div class="status-modal">
+        <button class="modal-close-btn" onclick="closeStatusModal()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-title">Update Status</div>
+        <div class="modal-subtitle">Set the resolution state for this service entry.</div>
+
+        <!-- Service name display -->
+        <div class="modal-service-info">
+            <div class="s-name" id="modalServiceName">—</div>
+            <div class="s-id" id="modalServiceId">—</div>
+        </div>
+
+        <!-- Status options -->
+        <div class="status-options">
+            <label class="status-option" id="optCompleted" onclick="selectStatus('completed')">
+                <input type="radio" name="statusChoice" value="completed">
+                <div class="status-option-dot"></div>
+                <div>
+                    <div class="status-option-label" style="color:#28a745;">
+                        <i class="fa-solid fa-circle-check me-2"></i>COMPLETED
+                    </div>
+                    <div class="status-option-desc">Mark service as successfully completed.</div>
+                </div>
+            </label>
+
+            <label class="status-option" id="optRejected" onclick="selectStatus('rejected')">
+                <input type="radio" name="statusChoice" value="rejected">
+                <div class="status-option-dot"></div>
+                <div>
+                    <div class="status-option-label" style="color:#dc3545;">
+                        <i class="fa-solid fa-circle-xmark me-2"></i>REJECTED
+                    </div>
+                    <div class="status-option-desc">Reject and close this service request.</div>
+                </div>
+            </label>
+        </div>
+
+        <!-- Hidden form that submits -->
+        <form id="statusForm" action="/myapp/update_service_status/" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="service_id" id="formServiceId">
+            <input type="hidden" name="status"     id="formStatus">
+            <button type="submit" class="btn-confirm-status" id="confirmBtn" disabled>
+                <i class="fa-solid fa-bolt me-2"></i>CONFIRM UPDATE
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let selectedStatus = null;
+
+    function openStatusModal(id, name) {
+        document.getElementById('modalServiceName').textContent = name;
+        document.getElementById('modalServiceId').textContent   = 'Service ID: #00' + id;
+        document.getElementById('formServiceId').value          = id;
+        // Reset state
+        selectedStatus = null;
+        document.getElementById('confirmBtn').disabled = true;
+        document.getElementById('optCompleted').classList.remove('selected-completed');
+        document.getElementById('optRejected').classList.remove('selected-rejected');
+        document.getElementById('statusModal').classList.add('show');
+    }
+
+    function closeStatusModal() {
+        document.getElementById('statusModal').classList.remove('show');
+    }
+
+    function selectStatus(val) {
+        selectedStatus = val;
+        document.getElementById('formStatus').value = val;
+        document.getElementById('confirmBtn').disabled = false;
+
+        document.getElementById('optCompleted').classList.remove('selected-completed');
+        document.getElementById('optRejected').classList.remove('selected-rejected');
+
+        if (val === 'completed') {
+            document.getElementById('optCompleted').classList.add('selected-completed');
+        } else {
+            document.getElementById('optRejected').classList.add('selected-rejected');
+        }
+    }
+
+    // Close on backdrop click
+    document.getElementById('statusModal').addEventListener('click', function(e) {
+        if (e.target === this) closeStatusModal();
+    });
+</script>
+{% endblock %}

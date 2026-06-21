@@ -1,0 +1,174 @@
+{% extends 'admin/Base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .dataset-header-text { font-family: var(--font-logo); letter-spacing: 2px; margin-bottom: 2rem; }
+
+    /* Knowledge Node Grid */
+    .knowledge-node-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 1.5rem;
+        backdrop-filter: blur(12px);
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .knowledge-node-card:hover {
+        border-color: var(--primary-glow);
+        box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.3);
+        transform: translateY(-8px);
+    }
+
+    .node-icon-tech {
+        width: 42px; height: 42px;
+        background: rgba(0, 229, 255, 0.1);
+        border: 1px solid var(--primary-glow);
+        color: var(--primary-glow);
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 10px; font-size: 1.2rem;
+        text-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .answer-transcript {
+        background: rgba(255, 255, 255, 0.02);
+        border-left: 2px solid var(--primary-glow);
+        padding: 1rem; border-radius: 0 12px 12px 0;
+        margin: 1rem 0; color: #cbd5e1; font-size: 0.85rem; flex-grow: 1;
+    }
+
+    /* Inline Input Styles */
+    .cyber-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: #ffffff; padding: 12px;
+        width: 100%; transition: 0.3s;
+    }
+
+    .cyber-input:focus {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        outline: none;
+    }
+
+    .modify-drawer { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color); animation: fadeIn 0.4s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+
+<div class="container-fluid py-5 animate__animated animate__fadeIn">
+    <div class="text-center mb-5">
+        <h2 class="dataset-header-text">KNOWLEDGE <span style="color: var(--primary-glow);">ARCHIVE.</span></h2>
+        <p class="text-secondary small">Neural Knowledge Base Grid Layout</p>
+
+        <button type="button" class="btn btn-glow mt-3" id="toggleAddBtn" onclick="toggleAddPanel()">
+            <i class="fa-solid fa-plus-circle me-2"></i>INITIALIZE SYNC
+        </button>
+    </div>
+
+    <div id="addSyncPanel" style="display: none; background: rgba(0, 229, 255, 0.03); border: 1px solid var(--border-color); border-radius: 28px; padding: 2.5rem; margin-bottom: 3.5rem; backdrop-filter: blur(25px); position: relative; animation: slideInDown 0.5s ease; box-shadow: 0 15px 45px rgba(0,0,0,0.4);">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);"></div>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col">
+                <h4 style="font-family: var(--font-logo); color: var(--primary-glow); margin: 0; letter-spacing: 2px;">SYNC_DATASET.</h4>
+                <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 5px;">Uploading new query-response sets into the neural core archive.</p>
+            </div>
+            <div class="col-auto">
+                <button type="button" onclick="toggleAddPanel()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-family: var(--font-logo); font-size: 0.65rem; border-radius: 8px; padding: 5px 15px; cursor: pointer;">[ TERMINATE_SYNC ]</button>
+            </div>
+        </div>
+
+        <form method="post" action="/myapp/admin_add_dataset_post/">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <label style="font-family: var(--font-logo); font-size: 0.65rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">INPUT_QUERY</label>
+                    <textarea name="qstn" rows="4" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 14px; color: #fff; padding: 15px; width: 100%; outline: none; resize: none;" placeholder="Define the trigger question..." required></textarea>
+                </div>
+                <div class="col-md-7">
+                    <label style="font-family: var(--font-logo); font-size: 0.65rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">SYSTEM_RESPONSE</label>
+                    <textarea name="ans" rows="4" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 14px; color: #fff; padding: 15px; width: 100%; outline: none; resize: none;" placeholder="Define the neural response protocol..." required></textarea>
+
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" style="background: var(--primary-glow); color: #000; font-family: var(--font-logo); font-size: 0.8rem; font-weight: 700; border: none; border-radius: 12px; padding: 12px 40px; box-shadow: 0 0 20px var(--primary-glow); cursor: pointer;">
+                            INITIALIZE_SYNC_PROTOCOL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for i in data %}
+        <div class="col-md-6 col-xl-4 animate__animated animate__fadeInUp">
+            <div class="knowledge-node-card shadow-lg">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="node-icon-tech"><i class="fa-solid fa-brain"></i></div>
+                    <span class="badge border border-info text-info font-monospace" style="font-size: 0.65rem;">ID: #{{ i.id }}</span>
+                </div>
+
+                <h6 class="fw-bold text-white mb-2" style="font-size: 0.95rem; line-height: 1.4;">{{ i.question }}</h6>
+
+                <div class="answer-transcript">
+                    <span class="text-info x-small d-block mb-1" style="font-family: var(--font-logo); font-size: 0.55rem; letter-spacing: 1px;">SYNCED_RESPONSE:</span>
+                    {{ i.answer|truncatechars:120 }}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3" id="btn-container-{{ i.id }}">
+                    <a href="/myapp/admin_delete_dataset/{{ i.id }}" class="text-danger small text-decoration-none" onclick="return confirm('Purge data from archive?')">
+                        <i class="fa-solid fa-eraser me-1"></i> PURGE
+                    </a>
+                    <button class="btn btn-glow btn-sm" onclick="showModifyDrawer('{{ i.id }}')">
+                        <i class="fa-solid fa-sliders me-2"></i>MODIFY
+                    </button>
+                </div>
+
+                <div class="modify-drawer" id="drawer-{{ i.id }}">
+                    <form action="/myapp/admin_edit_dataset_post/{{ i.id }}" method="POST">
+                        {% csrf_token %}
+                        <textarea name="qstn" class="cyber-input mb-2" rows="2">{{ i.question }}</textarea>
+                        <textarea name="ans" class="cyber-input mb-2" rows="3">{{ i.answer }}</textarea>
+                        <div class="d-flex justify-content-end align-items-center">
+                            <a href="javascript:void(0)" class="text-secondary small me-3 text-decoration-none" onclick="hideModifyDrawer('{{ i.id }}')">CANCEL</a>
+                            <button type="submit" class="btn btn-glow btn-sm">UPDATE</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleAddPanel() {
+        const panel = document.getElementById('addSyncPanel');
+        const btn = document.getElementById('toggleAddBtn');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+            btn.innerHTML = '<i class="fa-solid fa-xmark me-2"></i>CLOSE_SYNC_TERMINAL';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            panel.style.display = 'none';
+            btn.innerHTML = '<i class="fa-solid fa-plus-circle me-2"></i>INITIALIZE SYNC';
+        }
+    }
+
+    function showModifyDrawer(id) {
+        document.getElementById('drawer-' + id).style.display = 'block';
+        document.getElementById('btn-container-' + id).style.display = 'none';
+    }
+    function hideModifyDrawer(id) {
+        document.getElementById('drawer-' + id).style.display = 'none';
+        document.getElementById('btn-container-' + id).style.display = 'flex';
+    }
+</script>
+{% endblock %}

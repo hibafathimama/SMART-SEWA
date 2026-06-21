@@ -1,0 +1,384 @@
+{% extends 'staff/staffhome.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .form-header {
+        font-family: var(--font-logo);
+        color: white;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-glow);
+        padding-left: 15px;
+    }
+
+    /* ── Page Layout ─────────────────────────────────────── */
+    .doc-wrapper {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    /* ── Upload Card ─────────────────────────────────────── */
+    .cyber-card {
+        max-width: 100%;
+    }
+
+    .cyber-label {
+        font-family: var(--font-logo);
+        font-size: 0.75rem;
+        color: var(--primary-glow);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+        letter-spacing: 1px;
+    }
+
+    .cyber-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: #ffffff;
+        padding: 12px 15px;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .cyber-input:focus {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+    }
+
+    /* ── File Drop Zone ──────────────────────────────────── */
+    .file-drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        background: rgba(255,255,255,0.03);
+        position: relative;
+    }
+
+    .file-drop-zone:hover,
+    .file-drop-zone.drag-over {
+        border-color: var(--primary-glow);
+        background: rgba(0, 229, 255, 0.05);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+    }
+
+    .file-drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .file-drop-zone .drop-icon {
+        font-size: 2rem;
+        color: var(--primary-glow);
+        margin-bottom: 8px;
+    }
+
+    .file-drop-zone .drop-text {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.85rem;
+    }
+
+    .file-drop-zone .file-name-preview {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: var(--primary-glow);
+        font-family: var(--font-logo);
+    }
+
+    /* ── Section Divider ─────────────────────────────────── */
+    .section-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 2rem 0;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-color);
+    }
+
+    .section-divider span {
+        font-family: var(--font-logo);
+        font-size: 0.7rem;
+        color: var(--primary-glow);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    /* ── Document Grid ───────────────────────────────────── */
+    .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .doc-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 18px;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .doc-card:hover {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 18px rgba(0, 229, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .doc-card-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: rgba(0, 229, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--primary-glow);
+    }
+
+    .doc-card-title {
+        font-family: var(--font-logo);
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        word-break: break-word;
+    }
+
+    .doc-card-ext {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.35);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .doc-card-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+    }
+
+    .btn-doc-view {
+        flex: 1;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--primary-glow);
+        background: transparent;
+        color: var(--primary-glow);
+        font-size: 0.75rem;
+        font-family: var(--font-logo);
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: 0.2s;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-doc-view:hover {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--primary-glow);
+    }
+
+    .btn-doc-delete {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 80, 80, 0.4);
+        background: transparent;
+        color: rgba(255, 100, 100, 0.8);
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-doc-delete:hover {
+        background: rgba(255, 80, 80, 0.1);
+        border-color: rgba(255, 80, 80, 0.7);
+    }
+
+    /* ── Empty State ─────────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: rgba(255,255,255,0.2);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        color: rgba(0, 229, 255, 0.2);
+    }
+
+    .empty-state p {
+        font-family: var(--font-logo);
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    /* ── Doc Count Badge ─────────────────────────────────── */
+    .doc-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 229, 255, 0.15);
+        color: var(--primary-glow);
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 0.72rem;
+        font-family: var(--font-logo);
+        letter-spacing: 1px;
+        margin-left: 10px;
+        border: 1px solid rgba(0, 229, 255, 0.25);
+    }
+</style>
+
+<div class="container py-5 animate__animated animate__zoomIn">
+    <div class="doc-wrapper">
+
+        <!-- ── Upload Card ─────────────────────────────────── -->
+        <div class="glass-card shadow-lg mb-4">
+            <div class="form-header">
+                <h3 class="mb-1">
+                    Upload <span style="color: var(--primary-glow);">Document.</span>
+                </h3>
+                <p class="text-secondary small">Attach verified identity or supporting files to your profile.</p>
+            </div>
+
+            <form action="/myapp/user_add_document/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="cyber-label">Document Title</label>
+                    <input type="text" name="title" class="cyber-input" required
+                           placeholder="e.g. Aadhaar Card, PAN Card, Certificate...">
+                </div>
+
+                <div class="mb-4">
+                    <label class="cyber-label">Select File</label>
+                    <div class="file-drop-zone" id="dropZone">
+                        <input type="file" name="document" id="fileInput" required
+                               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        <div class="drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <div class="drop-text">Drag & drop or click to browse</div>
+                        <div class="drop-text" style="margin-top:4px; font-size:0.72rem;">
+                            PDF, JPG, PNG, DOC — max 10 MB
+                        </div>
+                        <div class="file-name-preview" id="fileNamePreview"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-glow w-100 py-3">
+                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>
+                        Deploy Document
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── My Documents ────────────────────────────────── -->
+        <div class="glass-card shadow-lg">
+            <div class="form-header d-flex align-items-center">
+                <div>
+                    <h3 class="mb-1">
+                        My <span style="color: var(--primary-glow);">Documents.</span>
+                        <span class="doc-count-badge">{{ documents|length }} FILE{{ documents|length|pluralize }}</span>
+                    </h3>
+                    <p class="text-secondary small">All uploaded files linked to your account.</p>
+                </div>
+            </div>
+
+            {% if documents %}
+                <div class="doc-grid">
+                    {% for doc in documents %}
+                    <div class="doc-card">
+                        <!-- Icon based on file type -->
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="doc-card-icon">
+                                {% with doc.document.name|lower as fname %}
+                                    {% if '.pdf' in fname %}
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    {% elif '.jpg' in fname or '.jpeg' in fname or '.png' in fname %}
+                                        <i class="fa-solid fa-file-image"></i>
+                                    {% elif '.doc' in fname or '.docx' in fname %}
+                                        <i class="fa-solid fa-file-word"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-file"></i>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            <div>
+                                <div class="doc-card-title">{{ doc.title }}</div>
+                                <div class="doc-card-ext">
+                                    {{ doc.document.name|slice:"-4:"|upper|cut:"." }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="doc-card-actions">
+                            <a href="{{ doc.document.url }}" target="_blank" class="btn-doc-view">
+                                <i class="fa-solid fa-eye me-1"></i> View
+                            </a>
+                            <a href="/myapp/user_delete_document/{{ doc.id }}"
+                               class="btn-doc-delete"
+                               onclick="return confirm('Delete this document?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-folder-open d-block"></i>
+                    <p>NO DOCUMENTS FOUND</p>
+                    <p style="font-size:0.72rem; opacity:0.5;">Upload your first file using the form above.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // File name preview on select
+    document.getElementById('fileInput').addEventListener('change', function () {
+        const name = this.files[0]?.name || '';
+        document.getElementById('fileNamePreview').textContent = name ? '📎 ' + name : '';
+    });
+
+    // Drag-over highlight
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            document.getElementById('fileNamePreview').textContent = '📎 ' + file.name;
+        }
+    });
+</script>
+{% endblock %}

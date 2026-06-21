@@ -1,0 +1,220 @@
+{% extends 'admin/admin_home.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .modify-container { max-width: 1000px; margin: 0 auto; }
+
+    .modify-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 0;
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        overflow: hidden;
+        backdrop-filter: blur(25px);
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Left Pane: Identity Module */
+    .modify-sidebar {
+        background: rgba(0, 229, 255, 0.04);
+        padding: 3rem 2rem;
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .modify-sidebar::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+    }
+
+    .profile-frame {
+        width: 150px;
+        height: 150px;
+        border: 3px solid var(--primary-glow);
+        border-radius: 20px;
+        padding: 5px;
+        position: relative;
+        margin-bottom: 2rem;
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+    }
+
+    .profile-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15px;
+        background: #000;
+    }
+
+    .id-tag {
+        font-family: var(--font-logo);
+        font-size: 0.65rem;
+        color: var(--primary-glow);
+        background: rgba(0, 229, 255, 0.1);
+        padding: 4px 12px;
+        border-radius: 5px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    /* Right Pane: System Fields */
+    .form-section { padding: 3.5rem; }
+
+    .tech-label {
+        font-family: var(--font-logo);
+        font-size: 0.7rem;
+        color: var(--primary-glow);
+        margin-bottom: 0.6rem;
+        display: block;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    /* Specialized Radio Styling */
+    .cyber-radio-container {
+        display: flex;
+        gap: 15px;
+        margin-top: 5px;
+    }
+
+    .cyber-radio-btn {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: 0.3s;
+    }
+
+    .cyber-radio-btn input { display: none; }
+
+    .cyber-radio-btn:has(input:checked) {
+        background: rgba(0, 229, 255, 0.1);
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+    }
+
+    .cyber-radio-btn:has(input:checked) span { color: var(--primary-glow); font-weight: bold; }
+</style>
+
+<div class="container-fluid py-5 animate__animated animate__fadeIn">
+    <div class="modify-container">
+        <div class="modify-grid">
+
+            <div class="modify-sidebar">
+                <div class="text-center w-100">
+                    <h4 class="mb-4" style="font-family: var(--font-logo); color: #fff; letter-spacing: 2px;">STAFF <span style="color: var(--primary-glow);">META.</span></h4>
+
+                    <div class="profile-frame mx-auto" id="image-frame">
+                        <img src="{{ data.photo.url }}" alt="Profile Photo">
+                    </div>
+
+                    <div class="id-tag">UID: #{{ data.id|add:"1000" }}</div>
+
+                    <h5 id="preview-name" class="fw-bold text-white mb-1">{{ data.name }}</h5>
+                    <p class="text-secondary small font-monospace">ACCESS_LEVEL: LEVEL_2</p>
+
+                    <div class="mt-5 pt-4 border-top border-secondary w-100">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted x-small font-monospace">LAST_SYNC:</span>
+                            <span class="text-info x-small font-monospace">SECURE</span>
+                        </div>
+                        <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05);">
+                            <div class="progress-bar bg-info" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <form method="post" action="/myapp/admin_edit_staff_post/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ data.id }}">
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="tech-label"><i class="fa-solid fa-user-tag me-2"></i>Personnel_Name</label>
+                            <input type="text" name="Name" value="{{ data.name }}" class="form-control" required
+                                   onkeyup="document.getElementById('preview-name').innerText = this.value || 'Personnel_Unknown'">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="tech-label"><i class="fa-solid fa-venus-mars me-2"></i>Gender_Class</label>
+                            <div class="cyber-radio-container">
+                                <label class="cyber-radio-btn">
+                                    <input type="radio" name="gender" value="male" {% if data.gender|lower == 'male' %}checked{% endif %}>
+                                    <i class="fa-solid fa-mars"></i> <span>MALE</span>
+                                </label>
+                                <label class="cyber-radio-btn">
+                                    <input type="radio" name="gender" value="female" {% if data.gender|lower == 'female' %}checked{% endif %}>
+                                    <i class="fa-solid fa-venus"></i> <span>FEMALE</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tech-label"><i class="fa-solid fa-calendar-check me-2"></i>Date_of_Birth</label>
+                            <input type="date" name="dob" value="{{ data.dob|date:'Y-m-d' }}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="tech-label"><i class="fa-solid fa-phone me-2"></i>Comm_Channel</label>
+                            <input type="text" name="number" value="{{ data.phoneno }}" class="form-control">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="tech-label"><i class="fa-solid fa-envelope-open-text me-2"></i>Primary_Email</label>
+                            <input type="email" name="email" value="{{ data.email }}" class="form-control">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="tech-label"><i class="fa-solid fa-camera-rotate me-2"></i>Update_Biometric_Image</label>
+                            <input type="file" name="photo" class="form-control" onchange="previewImage(event)">
+                        </div>
+
+                        <div class="col-12 pt-4 border-top border-secondary">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <button type="submit" class="btn btn-glow w-100 py-3">
+                                        <i class="fa-solid fa-rotate me-2"></i>SYNCHRONIZE_PROFILE
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="/myapp/admin_view_staff/" class="btn btn-outline-secondary w-100 py-3" style="border-radius: 12px; font-family: var(--font-logo); font-size: 0.75rem;">
+                                        TERMINATE
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Image Preview Function
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            const output = document.getElementById('image-frame');
+            output.innerHTML = `<img src="${reader.result}" class="animate__animated animate__pulse">`;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+{% endblock %}

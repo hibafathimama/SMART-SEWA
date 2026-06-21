@@ -1,0 +1,182 @@
+{% extends 'admin/Base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    /* --- Service Deployment Drawer (Add Service) --- */
+    #serviceDeploymentDrawer {
+        display: none;
+        background: rgba(0, 229, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 28px;
+        padding: 2.5rem;
+        margin-bottom: 3.5rem;
+        backdrop-filter: blur(25px);
+        animation: slideInDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    #serviceDeploymentDrawer::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+    }
+
+    /* Grid Logic */
+    .service-node-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 1.5rem;
+        backdrop-filter: blur(15px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .service-node-card:hover {
+        border-color: var(--primary-glow);
+        transform: translateY(-8px);
+        box-shadow: 0 0 30px rgba(0, 229, 255, 0.15);
+    }
+
+    .cost-tag {
+        font-family: var(--font-logo);
+        font-size: 0.9rem;
+        color: var(--primary-glow);
+        background: rgba(0, 229, 255, 0.1);
+        padding: 5px 15px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    .tech-icon-box {
+        width: 50px; height: 50px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary-glow); font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .cyber-input-service {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 12px; color: #ffffff;
+        padding: 12px; width: 100%; font-size: 0.85rem;
+        margin-bottom: 12px; transition: 0.3s;
+    }
+
+    .cyber-input-service:focus {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        outline: none;
+    }
+</style>
+
+<div class="container-fluid animate__animated animate__fadeIn py-4">
+    <div class="row mb-5 align-items-center">
+        <div class="col">
+            <h2 style="font-family: var(--font-logo);"><i class="fa-solid fa-server me-3"></i>NETWORK <span style="color: var(--primary-glow);">SERVICES.</span></h2>
+            <p class="text-secondary small mb-0">System Utility & Capability Registry</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-glow" id="toggleServiceBtn" onclick="toggleServiceDrawer()">
+                <i class="fa fa-plus-circle me-2"></i>DEPLOY NEW SERVICE
+            </button>
+        </div>
+    </div>
+
+    <div id="serviceDeploymentDrawer">
+        <div class="row mb-4">
+            <div class="col">
+                <h4 style="font-family: var(--font-logo); color: var(--primary-glow);">CAPABILITY_INITIALIZATION.</h4>
+                <p class="text-secondary small">Registering new operational utility into the system core framework.</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-sm text-danger font-monospace" onclick="toggleServiceDrawer()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 5px 15px;">[ ABORT_DEPLOYMENT ]</button>
+            </div>
+        </div>
+
+        <form action="/myapp/admin_add_service_post/" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-md-5">
+                    <label style="font-family: var(--font-logo); font-size: 0.6rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">SERVICE_IDENTIFIER</label>
+                    <input type="text" name="name" required class="cyber-input-service" placeholder="Service Name (e.g. Neural Link)">
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label style="font-family: var(--font-logo); font-size: 0.6rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">CREDIT_COST (₹)</label>
+                            <input type="number" name="cost" class="cyber-input-service" placeholder="0.00">
+                        </div>
+                        <div class="col-6">
+                            <label style="font-family: var(--font-logo); font-size: 0.6rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">PROCESS_TIME</label>
+                            <input type="text" name="time" class="cyber-input-service" placeholder="e.g. 2.5 Hrs">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <label style="font-family: var(--font-logo); font-size: 0.6rem; color: var(--primary-glow); display: block; margin-bottom: 8px;">OPERATIONAL_PARAMETERS (Details)</label>
+                    <textarea name="det" class="cyber-input-service" rows="5" style="resize: none;" placeholder="Describe service capabilities..."></textarea>
+
+                    <div class="d-flex justify-content-end mt-2">
+                        <button type="submit" class="btn btn-glow px-5 py-3" style="background: var(--primary-glow); color: #000; font-weight: bold;">
+                            <i class="fa-solid fa-satellite-dish me-2"></i>BROADCAST_CAPABILITY
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for i in data %}
+        <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp">
+            <div class="service-node-card shadow-lg">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="tech-icon-box">
+                        <i class="fa-solid fa-gears"></i>
+                    </div>
+                    <div class="cost-tag">₹ {{ i.cost }}</div>
+                </div>
+
+                <h5 class="fw-bold text-white mb-2" style="letter-spacing: 1px;">{{ i.service|upper }}</h5>
+                <p class="text-secondary small flex-grow-1" style="line-height: 1.6;">{{ i.details|truncatechars:100 }}</p>
+
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                    <div class="small font-monospace text-info"><i class="fa-regular fa-clock me-2"></i>{{ i.time }}</div>
+                    <div class="d-flex gap-2">
+                        <a href="/myapp/admin_view_document/{{ i.id }}" class="action-btn-tech btn-doc-glow" title="Documents">
+                            <i class="fa-solid fa-file-shield"></i>
+                        </a>
+                        <a href="/myapp/admin_edit_services/{{ i.id }}" class="action-btn-tech btn-edit-glow"><i class="fa-solid fa-code-merge"></i></a>
+                        <a href="/myapp/admin_delete_service/{{ i.id }}" class="action-btn-tech btn-delete-glow" onclick="return confirm('Purge service?')"><i class="fa-solid fa-eraser"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleServiceDrawer() {
+        const drawer = document.getElementById('serviceDeploymentDrawer');
+        const btn = document.getElementById('toggleServiceBtn');
+        if (drawer.style.display === 'none' || drawer.style.display === '') {
+            drawer.style.display = 'block';
+            btn.innerHTML = '<i class="fa-solid fa-xmark me-2"></i>CLOSE_TERMINAL';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            drawer.style.display = 'none';
+            btn.innerHTML = '<i class="fa fa-plus-circle me-2"></i>DEPLOY NEW SERVICE';
+        }
+    }
+</script>
+{% endblock %}

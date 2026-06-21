@@ -1,0 +1,143 @@
+{% extends 'admin/Base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    /* Technical Feedback Styling */
+    .sentiment-header { font-family: var(--font-logo); letter-spacing: 2px; margin-bottom: 2rem; }
+
+    .feedback-node-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 1.5rem;
+        backdrop-filter: blur(12px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feedback-node-card:hover {
+        border-color: var(--primary-glow);
+        transform: translateY(-8px);
+        box-shadow: 0 0 25px rgba(0, 229, 255, 0.2);
+    }
+
+    /* Biometric Photo Frame */
+    .user-photo-tech {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 229, 255, 0.05);
+        border: 1px solid var(--primary-glow);
+        border-radius: 12px;
+        padding: 2px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
+
+    .user-photo-tech img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .user-photo-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-glow);
+        font-family: var(--font-logo);
+        font-weight: 700;
+        text-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .star-rating-cyber { color: var(--primary-glow); text-shadow: 0 0 8px rgba(0, 229, 255, 0.6); font-size: 0.85rem; }
+    .star-muted { color: rgba(255, 255, 255, 0.1); text-shadow: none; }
+
+    .feedback-transcript {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid var(--primary-glow);
+        padding: 1.2rem;
+        border-radius: 0 15px 15px 0;
+        margin: 1.2rem 0;
+        color: #cbd5e1;
+        font-style: italic;
+        font-size: 0.9rem;
+        flex-grow: 1;
+    }
+
+    .tech-date-badge {
+        font-family: var(--font-logo);
+        font-size: 0.65rem;
+        color: var(--primary-glow);
+        background: rgba(0, 229, 255, 0.05);
+        padding: 4px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="container-fluid py-5 animate__animated animate__fadeIn">
+    <div class="text-center mb-5">
+        <h2 class="sentiment-header">SENTIMENT <span style="color: var(--primary-glow);">ANALYSIS.</span></h2>
+        <p class="text-secondary small">Monitoring user satisfaction metrics and biometric-linked testimonials.</p>
+    </div>
+
+    <div class="row g-4">
+        {% for i in data %}
+        <div class="col-xl-4 col-md-6 animate__animated animate__fadeInUp">
+            <div class="feedback-node-card shadow-lg">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="user-photo-tech">
+                            {% if i.USER.photo %}
+                                <img src="{{ i.USER.photo.url }}" alt="User">
+                            {% else %}
+                                <div class="user-photo-fallback text-uppercase">
+                                    {{ i.USER.name|slice:":1" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-white" style="font-size: 0.95rem;">{{ i.USER.name }}</h6>
+                            <div class="star-rating-cyber">
+                                {% with ''|center:5 as range %}
+                                {% for _ in range %}
+                                    {% if forloop.counter <= i.rating %}
+                                        <i class="fa-solid fa-star"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-star star-muted"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                                <span class="ms-1 text-secondary x-small font-monospace">[{{ i.rating }}.0]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tech-date-badge">
+                        <i class="fa-solid fa-clock-rotate-left me-1"></i> {{ i.date }}
+                    </div>
+                </div>
+
+                <div class="feedback-transcript">
+                    <i class="fa-solid fa-quote-left text-info opacity-25 fs-4 mb-2 d-block"></i>
+                    "{{ i.feedback }}"
+                </div>
+
+                <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                    <div class="small font-monospace text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;">LOG_ID: #FB-{{ i.id }}</div>
+                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.6rem; font-family: var(--font-logo);">
+                        SECURE_TRANSIT
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

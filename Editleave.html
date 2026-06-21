@@ -1,0 +1,101 @@
+{% extends 'staff/staffhome.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .form-header {
+        font-family: var(--font-logo);
+        color: white;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-glow);
+        padding-left: 15px;
+    }
+
+    .cyber-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .cyber-label {
+        font-family: var(--font-logo);
+        font-size: 0.75rem;
+        color: var(--primary-glow);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+        letter-spacing: 1px;
+    }
+
+    .cyber-input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: #ffffff;
+        padding: 12px 15px;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .cyber-input:focus {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) hue-rotate(180deg);
+        cursor: pointer;
+    }
+</style>
+
+<div class="container py-5 animate__animated animate__zoomIn">
+    <div class="cyber-card">
+        <div class="glass-card shadow-lg">
+            <div class="form-header">
+                <h3 class="mb-1">
+                    {% if data %}Synchronize <span style="color: var(--primary-glow);">Edit.</span>
+                    {% else %}Initialize <span style="color: var(--primary-glow);">Request.</span>{% endif %}
+                </h3>
+                <p class="text-secondary small">Define absence parameters for system sync.</p>
+            </div>
+
+            <form action="{% if data %}/myapp/edit_leave_post/{% else %}/myapp/add_leave_post/{% endif %}" method="post">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="cyber-label">Reason for Absence</label>
+                    <textarea name="reason" class="cyber-input" rows="3" required placeholder="Detailed reason...">{{ data.reason }}</textarea>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <label class="cyber-label">Application Date</label>
+                        <input type="date" name="applydate" class="cyber-input" 
+                               value="{% if data %}{{ data.applydate|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="cyber-label">Start Date</label>
+                        <input type="date" name="fromdate" class="cyber-input" value="{{ data.fromdate|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="cyber-label">End Date</label>
+                    <input type="date" name="todate" class="cyber-input" value="{{ data.todate|date:'Y-m-d' }}" required>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-glow w-100 py-3">
+                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>
+                        {% if data %}Update Records{% else %}Deploy Request{% endif %}
+                    </button>
+                    <a href="/myapp/staff_view_leave/" class="btn btn-outline-secondary rounded-pill px-4 py-3 border-secondary text-secondary">
+                        Discard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

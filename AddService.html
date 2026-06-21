@@ -1,0 +1,53 @@
+{% extends 'admin/Base.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    .form-container-cyber { max-width: 600px; margin: 2rem auto; }
+    .tech-label { font-family: var(--font-logo); font-size: 0.7rem; color: var(--primary-glow); letter-spacing: 1.5px; margin-bottom: 8px; display: block; }
+</style>
+
+<div class="container animate__animated animate__zoomIn">
+    <div class="form-container-cyber">
+        <div class="glass-card">
+            <div class="text-center mb-5">
+                <h3 style="font-family: var(--font-logo); letter-spacing: 2px;">INITIALIZE <span style="color: var(--primary-glow);">SERVICE.</span></h3>
+                <p class="text-secondary small">Registering new utility node to system core</p>
+            </div>
+
+            <form method="post" action="/myapp/admin_add_service_post/">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="tech-label">SERVICE_IDENTIFIER</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter service name..." required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="tech-label">CAPABILITY_DETAILS</label>
+                    <textarea name="det" class="form-control" rows="4" placeholder="Describe operational parameters..."></textarea>
+                </div>
+
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label class="tech-label">CREDIT_COST (₹)</label>
+                        <input type="number" name="cost" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="tech-label">EST_PROCESS_TIME</label>
+                        <input type="text" name="time" class="form-control" placeholder="e.g. 2.5 Hours">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-glow w-100 py-3 fw-bold">
+                    <i class="fa-solid fa-satellite-dish me-2"></i> BROADCAST SERVICE
+                </button>
+
+                <a href="/myapp/admin_view_service/" class="text-center d-block mt-4 text-secondary small text-decoration-none">
+                    <i class="fa fa-arrow-left me-2"></i> ABORT REGISTRATION
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

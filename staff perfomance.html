@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Performance — {{ staff_name }}</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --card: #161d2e;
+      --border: #1e2d45;
+      --accent: #00e5c3;
+      --accent2: #4f6ef7;
+      --accent3: #f7c94f;
+      --text: #e8f0fe;
+      --muted: #6b7a99;
+      --danger: #ff5f7e;
+    }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      background-image:
+        radial-gradient(ellipse at 10% 10%, rgba(79,110,247,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(0,229,195,0.07) 0%, transparent 50%);
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .header-left .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .header-left h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .header-left h1 span {
+      color: var(--accent);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(0,229,195,0.1);
+      border: 1px solid rgba(0,229,195,0.25);
+      color: var(--accent);
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 0.8rem;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--accent2); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .stat-card:nth-child(1)::before { background: var(--accent); }
+    .stat-card:nth-child(2)::before { background: var(--accent2); }
+    .stat-card:nth-child(3)::before { background: var(--accent3); }
+
+    .stat-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-card:nth-child(1) .stat-value { color: var(--accent); }
+    .stat-card:nth-child(2) .stat-value { color: var(--accent2); }
+    .stat-card:nth-child(3) .stat-value { color: var(--accent3); }
+
+    .stat-unit {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ── Charts ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+    }
+
+    .chart-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+
+    /* ── Table ── */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .table-count {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: rgba(255,255,255,0.02);
+    }
+
+    th {
+      padding: 0.75rem 1.5rem;
+      text-align: left;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1.5rem;
+      font-size: 0.82rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    .booking-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(79,110,247,0.12);
+      border: 1px solid rgba(79,110,247,0.2);
+      color: #8fa4ff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .time-val {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .duration-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .duration-bar {
+      flex: 1;
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 99px;
+      overflow: hidden;
+      min-width: 60px;
+    }
+
+    .duration-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 99px;
+      transition: width 1s ease;
+    }
+
+    .duration-text {
+      font-size: 0.78rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state p { font-size: 0.85rem; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <p class="eyebrow">Performance Dashboard</p>
+      <h1>{{ staff_name }}<br><span>#{{ staff_id }}</span></h1>
+      <div class="badge">{{ total_bookings }} Booking{{ total_bookings|pluralize }}</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Bookings</div>
+      <div class="stat-value">{{ total_bookings }}</div>
+      <div class="stat-unit">sessions attended</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Hours</div>
+      <div class="stat-value">{{ total_hours }}</div>
+      <div class="stat-unit">hours worked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Duration</div>
+      <div class="stat-value">{{ avg_minutes }}</div>
+      <div class="stat-unit">minutes per booking</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  {% if data %}
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">⏱ Time Worked per Booking (min)</div>
+      <div class="chart-wrap">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">◉ Duration Distribution</div>
+      <div class="chart-wrap">
+        <canvas id="doughnutChart"></canvas>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <h2>Session Breakdown</h2>
+      <span class="table-count">{{ total_bookings }} record{{ total_bookings|pluralize }}</span>
+    </div>
+
+    {% if data %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Booking</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in data %}
+        <tr>
+          <td style="color: var(--muted);">{{ forloop.counter }}</td>
+          <td><span class="booking-chip">{{ entry.BOOKING.id }}</span></td>
+          <td class="time-val">{{ entry.start_time|default:"—" }}</td>
+          <td class="time-val">{{ entry.end_time|default:"—" }}</td>
+          <td>
+            <div class="duration-bar-wrap">
+              <div class="duration-bar">
+                <div class="duration-bar-fill"
+                     style="width: {{ chart_durations|join:',' }}"
+                     data-index="{{ forloop.counter0 }}"></div>
+              </div>
+              <span class="duration-text" data-index="{{ forloop.counter0 }}">—</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div style="font-size: 2.5rem;">📭</div>
+      <p>No performance records found for this staff member.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Chart.js Scripts -->
+  <script>
+    const labels = {{ chart_labels|safe }};
+    const durations = {{ chart_durations|safe }};
+    const maxDur = Math.max(...durations, 1);
+
+    // Fill duration bars in table
+    document.querySelectorAll('.duration-bar-fill').forEach(el => {
+      const i = parseInt(el.dataset.index);
+      el.style.width = ((durations[i] / maxDur) * 100) + '%';
+    });
+    document.querySelectorAll('.duration-text').forEach(el => {
+      const i = parseInt(el.dataset.index);
+      el.textContent = durations[i] + ' min';
+    });
+
+    // Bar Chart
+    const barCtx = document.getElementById('barChart')?.getContext('2d');
+    if (barCtx) {
+      new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Minutes',
+            data: durations,
+            backgroundColor: durations.map((_, i) =>
+              `hsla(${160 + i * 20}, 80%, 60%, 0.7)`
+            ),
+            borderColor: durations.map((_, i) =>
+              `hsla(${160 + i * 20}, 80%, 60%, 1)`
+            ),
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#161d2e',
+              titleColor: '#00e5c3',
+              bodyColor: '#e8f0fe',
+              borderColor: '#1e2d45',
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => ` ${ctx.parsed.y} minutes`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#6b7a99', font: { size: 10 } },
+              grid: { color: 'rgba(255,255,255,0.04)' }
+            },
+            y: {
+              ticks: { color: '#6b7a99', font: { size: 10 } },
+              grid: { color: 'rgba(255,255,255,0.06)' }
+            }
+          }
+        }
+      });
+    }
+
+    // Doughnut Chart
+    const dCtx = document.getElementById('doughnutChart')?.getContext('2d');
+    if (dCtx) {
+      new Chart(dCtx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: durations,
+            backgroundColor: durations.map((_, i) =>
+              `hsla(${200 + i * 25}, 75%, 55%, 0.75)`
+            ),
+            borderColor: '#0b0f1a',
+            borderWidth: 2,
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#6b7a99',
+                font: { size: 10 },
+                boxWidth: 10,
+                padding: 12,
+              }
+            },
+            tooltip: {
+              backgroundColor: '#161d2e',
+              titleColor: '#00e5c3',
+              bodyColor: '#e8f0fe',
+              borderColor: '#1e2d45',
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => ` ${ctx.parsed} min`
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

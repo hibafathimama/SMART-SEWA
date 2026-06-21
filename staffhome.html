@@ -1,0 +1,140 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSeva | Staff Portal</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --primary-glow: #00e5ff;
+            --bg-dark: #020408;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(0, 229, 255, 0.2);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-logo: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background: linear-gradient(rgba(2, 4, 8, 0.85), rgba(2, 4, 8, 0.85)), url("{% static 'opoy7.jpg' %}");
+            background-size: cover;
+            background-attachment: fixed;
+            color: #ffffff;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar { background: rgba(2, 4, 8, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; z-index: 1000; }
+        .navbar-brand { font-family: var(--font-logo); font-weight: 700; color: var(--primary-glow) !important; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
+        .nav-link { color: #94a3b8 !important; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { color: var(--primary-glow) !important; text-shadow: 0 0 8px var(--primary-glow); }
+
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 2rem; backdrop-filter: blur(12px); transition: 0.3s; }
+        .section-view { display: none; padding: 60px 0; }
+        .section-view.active { display: block; }
+
+        .btn-glow { background: transparent; border: 1px solid var(--primary-glow); color: var(--primary-glow); padding: 10px 25px; border-radius: 12px; font-family: var(--font-logo); font-size: 0.8rem; transition: 0.3s; }
+        .btn-glow:hover { background: var(--primary-glow); color: #000; box-shadow: 0 0 20px var(--primary-glow); }
+
+        footer { background: rgba(2, 4, 8, 0.9); border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-xl sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">SMARTSEVA</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <i class="fa-solid fa-bars-staggered text-info"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/myapp/staffhome/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/myapp/view_profile/">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/myapp/staff_add_notification/">Notification</a></li>
+<!--                    <li class="nav-item"><a class="nav-link" href="/myapp/staff_view_document/">Document</a></li>-->
+                    <li class="nav-item"><a class="nav-link" href="/myapp/staff_view_leave/">Leave</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/myapp/staff_view_services/">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/myapp/staff_view_booking/">Bookings</a></li>
+                    <li class="nav-item">
+                        <a class="btn btn-glow btn-logout ms-lg-3" href="/myapp/loginget/">
+                            <i class="fa-solid fa-power-off me-2"></i>LOGOUT
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+
+        <div id="spa-sections">
+            <section id="home" class="section-view active animate__animated animate__fadeIn">
+                <div class="row align-items-center" style="min-height: 60vh;">
+                    <div class="col-lg-7">
+                        <h1 class="display-3 fw-bold mb-4" style="font-family: var(--font-logo);">Staff <span style="color: var(--primary-glow);">Dashboard.</span></h1>
+                        <p class="lead text-secondary mb-5">Access internal systems, manage your profile, and monitor live service metrics.</p>
+                        <button class="btn btn-glow me-3" onclick="navigate('service')">View Tasks</button>
+                    </div>
+                </div>
+                <div id="dynamic-content">
+            {% block body %}
+            {% endblock %}
+        </div>
+            </section>
+
+            <section id="analytics" class="section-view animate__animated animate__fadeIn">
+                <h2 class="mb-5" style="font-family: var(--font-logo);">Live Metrics</h2>
+                <div class="row g-4 text-center">
+                    <div class="col-md-3"><div class="glass-card"><h5 class="text-muted">Uptime</h5><h2 class="text-success">99.9%</h2></div></div>
+                </div>
+            </section>
+
+            <section id="service" class="section-view animate__animated animate__fadeInUp">
+                <h2 class="text-center mb-5" style="font-family: var(--font-logo);">Capabilities</h2>
+                <div class="row g-4">
+                    <div class="col-md-4"><div class="glass-card"><h4>AI Logic</h4><p class="text-secondary">Predictive analysis active.</p></div></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="text-muted small">&copy; 2025 SmartSeva Technologies.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function navigate(sectionId, element) {
+            // Hide the Django-injected content if it exists
+            const dynamicContent = document.getElementById('dynamic-content');
+            if(dynamicContent) dynamicContent.style.display = 'none';
+
+            // Show the SPA sections container
+            document.getElementById('spa-sections').style.display = 'block';
+
+            // Normal SPA navigation
+            document.querySelectorAll('.section-view').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+            const target = document.getElementById(sectionId);
+            if(target) {
+                target.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if(element) element.classList.add('active');
+        }
+    </script>
+</body>
+</html>

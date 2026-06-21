@@ -1,0 +1,125 @@
+{% extends 'staff/staffhome.html' %}
+{% load static %}
+
+{% block body %}
+<style>
+    /* Table specific technical styling */
+    .cyber-table-container {
+        margin-top: 2rem;
+        overflow: hidden;
+    }
+
+    .cyber-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px; /* Gap between rows */
+        color: #e2e8f0;
+    }
+
+    .cyber-table thead th {
+        font-family: var(--font-logo);
+        color: var(--primary-glow);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        padding: 15px 20px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .cyber-table tbody tr {
+        background: rgba(255, 255, 255, 0.03);
+        transition: 0.3s;
+        backdrop-filter: blur(5px);
+    }
+
+    .cyber-table tbody tr:hover {
+        background: rgba(0, 229, 255, 0.05);
+        transform: scale(1.01);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+    }
+
+    .cyber-table td {
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .cyber-table td:first-child {
+        border-left: 1px solid var(--border-color);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+        font-weight: 600;
+    }
+
+    .cyber-table td:last-child {
+        border-right: 1px solid var(--border-color);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .doc-icon {
+        color: var(--primary-glow);
+        margin-right: 15px;
+        filter: drop-shadow(0 0 5px var(--primary-glow));
+    }
+
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(0, 225, 255, 0.1);
+        border: 1px solid var(--primary-glow);
+        color: var(--primary-glow);
+        font-family: var(--font-logo);
+    }
+</style>
+
+<div class="container py-5 animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="mb-0" style="font-family: var(--font-logo);">DOCUMENT <span style="color: var(--primary-glow);">ARCHIVE.</span></h2>
+            <p class="text-secondary small mb-0">System Registry / Internal Files</p>
+        </div>
+<!--        <button class="btn btn-glow" onclick="location.href='/myapp/add_document/'">-->
+<!--            <i class="fa-solid fa-plus me-2"></i>ADD NEW-->
+<!--        </button>-->
+    </div>
+
+    <div class="glass-card cyber-table-container">
+        <div class="table-responsive">
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th><i class="fa-solid fa-file-code me-2"></i>Document Name</th>
+                        <th><i class="fa-solid fa-circle-info me-2"></i>Technical Details</th>
+                        <th><i class="fa-solid fa-circle-info me-2"></i>Service</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                    {% for i in data %}
+                    <tr>
+                        <td>
+                            <i class="fa-solid fa-file-shield doc-icon"></i>
+                            {{ i.document }}
+                        </td>
+                        <td>
+                            <span class="text-secondary">{{ i.details }}</span>
+                        </td>
+                        <td>
+                            {{ i.SERVICE.service }}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{i.document.url}}" class="btn btn-sm btn-outline-info border-0" download><i class="fa-solid fa-pen-to-square"></i></a>
+<!--                            <a href="/myapp/user_delete_documen/{{ i.id }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Delete record?')"><i class="fa-solid fa-trash"></i></a>-->
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
